@@ -2,41 +2,62 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+// global variables for a sort of state
 HHOOK keyboardHook;
-bool blockNextKey = false;
+bool aPressed = false;
+bool dPressed = false;
+bool aSimulated = false;
+bool dSimulated = false;
 
-// Function to check if a key should be blocked
-bool shouldBlockKey(DWORD vkCode) {
-    // Example: Block the 'A' key (virtual key code 65)
-    return vkCode == 65;
-    return vkCode == 68;
-}
-
-LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
-    if (nCode >= 0)
-    {
+LRESULT CALLBACK KeebProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    if(nCode >= 0) {
         KBDLLHOOKSTRUCT *kbdStruct = (KBDLLHOOKSTRUCT*)lParam;
         
-        if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
-        {
-            printf("Key pressed: %d\n", kbdStruct->vkCode);
-            
-            if (shouldBlockKey(kbdStruct->vkCode))
-            {
-                printf("Blocking key: %d\n", kbdStruct->vkCode);
-                blockNextKey = true;
-                return 1; // Block the key
+        if(wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+            // "A" key 
+            if(kbdStruct->vkCode == 65) {
+                if(!aPressed && !aSimulated) {
+                    printf("A pressed\n");
+                    aPressed = true;
+                    if(dPressed) {
+                        keybd_event(68, 0, KEYEVENTF_KEYUP, 0);  // Release 'D'
+                        dSimulated = true;
+                    }
+                }
+                return CallNextHookEx(keyboardHook, nCode, wParam, lParam);
+            // "D" key
+            } else if(kbdStruct->vkCode == 68) {
+                if(!dPressed && !dSimulated) {
+                    printf("D pressed\n");
+                    dPressed = true;
+                    if(aPressed) {
+                        keybd_event(65, 0, KEYEVENTF_KEYUP, 0);  // Release 'A'
+                        aSimulated = true;
+                    }
+                }
+                return CallNextHookEx(keyboardHook, nCode, wParam, lParam);
             }
-        }
-        else if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
-        {
-            printf("Key released: %d\n", kbdStruct->vkCode);
-            
-            if (blockNextKey)
-            {
-                blockNextKey = false;
-                return 1; // Block the key-up event for consistency
+        } else if(wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
+            // "A" key
+            if(kbdStruct->vkCode == 65) {
+                printf("A released\n");
+                aPressed = false;
+                if(dSimulated) {
+                    keybd_event(68, 0, 0, 0);  // Press 'D'
+                    dSimulated = false;
+                    dPressed = true;
+                }
+                aSimulated = false;
+            // "D" key
+            } else if(kbdStruct->vkCode == 68) {
+                printf("D released\n");
+                dPressed = false;
+                if(aSimulated) {
+                    keybd_event(65, 0, 0, 0);  // Press 'A'
+                    aSimulated = false;
+                    aPressed = true;
+                }
+                dSimulated = false;
             }
         }
     }
@@ -44,26 +65,23 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(keyboardHook, nCode, wParam, lParam);
 }
 
-int main()
-{
-    keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
-    
-    if (keyboardHook == NULL)
-    {
-        printf("Failed to install keyboard hook!\n");
+int main() {
+    keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeebProc, NULL, 0);
+
+    if(keyboardHook == NULL) {
+        printf("Failed to set keyboard hook!\n");
         return 1;
     }
-    
-    printf("Keyboard hook installed. Press any key (Ctrl+C to exit)...\n");
-    printf("The 'A' key (vkCode 65) will be blocked as an example.\n");
-    
+
+    printf("Keyboard hook set. Press Ctrl+C to exit...\n");
+    printf("\"A\" and \"D\" keys will interact: holding one while tapping the other will maintain activation.\n");
+
     MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0) > 0)
-    {
+    while(GetMessage(&msg, NULL, 0, 0) > 0) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    
+
     UnhookWindowsHookEx(keyboardHook);
     return 0;
 }
