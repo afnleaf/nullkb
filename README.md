@@ -20,10 +20,10 @@ gcc nullkb.c -o nullkb.exe -luser32
 
 ### MacOS
 ```
-./nullkb                                                                                                                                                        ✔  23:51:29
+./nullkb
 Failed to create event tap
 ```
-iTerm wants to control your computer keyboard through accessibility Services.
+iTerm wants to control your computer keyboard through accessibility Services. We will not go down this path yet.
 
 ### Unix/Linux
 
