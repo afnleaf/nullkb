@@ -18,7 +18,14 @@ You can also compile the .c file yourself if you know how.
 gcc nullkb.c -o nullkb.exe -luser32
 ```
 
-### Unix (Linux/MacOS)
+### MacOS
+```
+./nullkb                                                                                                                                                        ✔  23:51:29
+Failed to create event tap
+```
+iTerm wants to control your computer keyboard through accessibility Services.
+
+### Unix/Linux
 
 Work in progress.
 
