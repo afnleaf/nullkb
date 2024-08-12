@@ -1,5 +1,5 @@
 # nullkb
-Null movement for any game
+A null movement script for Windows written in C using the Win32 API. This script replicates the macros found in the new Wooting and Razer rapid trigger keyboards. Leveling the playing field and enabling OP movement for any game.
 
 A and D keys for strafing movement, W and S possible as well.
 
