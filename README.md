@@ -10,7 +10,7 @@ While <Key> is active. If <Pair> is activated, then <Key> must be deactivated.
 Clone the repo wherever you want.
 
 ### Windows
-Run the .exe provided by typing and entering `./nullkb.exe` into command prompt or powershell. You will have to `cd` your way to the directory that you downloaded it to.
+Run the .exe provided by clicking on it, or typing and entering `./nullkb.exe` into command prompt or powershell. You will have to `cd` your way to the directory that you downloaded it to.
 
 You can also compile the .c file yourself if you know how.
 
